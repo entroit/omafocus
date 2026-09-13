@@ -1,6 +1,7 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls as QQC
-import QtQuick.Layouts
 import qs.Commons
 import qs.Ui as Ui
 
@@ -50,6 +51,10 @@ Ui.Panel {
 
   function formatDate(timestamp) {
     return Qt.formatDateTime(new Date(Number(timestamp)), "ddd d MMM, HH:mm")
+  }
+
+  function duration(milliseconds) {
+    return service ? service.formatDuration(milliseconds) : "0:00"
   }
 
   onOpenedChanged: {
@@ -310,7 +315,7 @@ Ui.Panel {
             width: parent.width
             textFormat: Text.PlainText
             text: root.recapRecord
-              ? root.formatDate(root.recapRecord.startedAt) + "  ·  " + root.service.formatDuration(root.recapRecord.elapsedMilliseconds)
+              ? root.formatDate(root.recapRecord.startedAt) + "  ·  " + root.duration(root.recapRecord.elapsedMilliseconds)
               : ""
             color: Qt.darker(root.barForeground, 1.45)
             font.family: root.bar ? root.bar.fontFamily : Style.font.family
@@ -347,7 +352,7 @@ Ui.Panel {
                   anchors.right: parent.right
                   anchors.verticalCenter: parent.verticalCenter
                   textFormat: Text.PlainText
-                  text: root.service.formatDuration(modelData.milliseconds)
+                  text: root.duration(modelData.milliseconds)
                   color: Qt.darker(root.barForeground, 1.3)
                   font.family: root.bar ? root.bar.fontFamily : Style.font.family
                   font.pixelSize: Style.font.body
@@ -415,7 +420,7 @@ Ui.Panel {
           Text {
             width: parent.width
             textFormat: Text.PlainText
-            text: root.historySessions.length + (root.historySessions.length === 1 ? " session" : " sessions") + "  ·  " + root.service.formatDuration(root.historyTotals.elapsedMilliseconds || 0)
+            text: root.historySessions.length + (root.historySessions.length === 1 ? " session" : " sessions") + "  ·  " + root.duration(root.historyTotals.elapsedMilliseconds || 0)
             color: root.barForeground
             font.family: root.bar ? root.bar.fontFamily : Style.font.family
             font.pixelSize: Style.font.subtitle
@@ -426,7 +431,7 @@ Ui.Panel {
             textFormat: Text.PlainText
             elide: Text.ElideRight
             text: root.historyRows.length > 0
-              ? root.historyRows.slice(0, 3).map(function(row) { return row.name + " " + root.service.formatDuration(row.milliseconds) }).join("  ·  ")
+              ? root.historyRows.slice(0, 3).map(function(row) { return row.name + " " + root.duration(row.milliseconds) }).join("  ·  ")
               : "No recorded time in this period"
             color: Qt.darker(root.barForeground, 1.35)
             font.family: root.bar ? root.bar.fontFamily : Style.font.family
@@ -449,7 +454,7 @@ Ui.Panel {
                 leftAlign: true
                 focusable: true
                 foreground: root.barForeground
-                text: root.formatDate(modelData.startedAt) + "  ·  " + root.service.formatDuration(modelData.elapsedMilliseconds) + (modelData.goal ? "  ·  " + modelData.goal : "")
+                text: root.formatDate(modelData.startedAt) + "  ·  " + root.duration(modelData.elapsedMilliseconds) + (modelData.goal ? "  ·  " + modelData.goal : "")
                 onClicked: root.showRecap(modelData)
               }
             }
@@ -459,7 +464,7 @@ Ui.Panel {
             width: parent.width
             textFormat: Text.PlainText
             wrapMode: Text.WordWrap
-            text: "Sessions belong to the local date they started. Weeks begin Monday. Manual export: copy " + root.service.dataPath
+            text: "Sessions belong to the local date they started. Weeks begin Monday. Manual export: copy " + (root.service ? root.service.dataPath : "the sessions JSON file")
             color: Qt.darker(root.barForeground, 1.55)
             font.family: root.bar ? root.bar.fontFamily : Style.font.family
             font.pixelSize: Style.font.caption
@@ -469,7 +474,7 @@ Ui.Panel {
             text: "Clear saved history"
             focusable: true
             foreground: Color.urgent
-            enabled: root.service.sessions.length > 0
+            enabled: root.service && root.service.sessions.length > 0
             onClicked: clearConfirmation.opened = true
           }
         }
@@ -507,7 +512,7 @@ Ui.Panel {
         onCanceled: opened = false
         onConfirmed: {
           opened = false
-          root.service.clearHistory()
+          if (root.service) root.service.clearHistory()
         }
       }
     }
