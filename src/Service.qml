@@ -367,32 +367,6 @@ Item {
     onTriggered: sleepMonitor.running = true
   }
 
-  IpcHandler {
-    target: "entroit.omafocus"
-
-    function state(): string {
-      return JSON.stringify({
-        ready: root.ready,
-        status: root.current ? root.current.status : "inactive",
-        remainingMilliseconds: root.remainingMilliseconds,
-        sessionCount: root.sessions.length,
-        saving: root.writeInFlight,
-        saveQueued: root.queuedSnapshot !== "",
-        error: root.fatalError || root.saveError
-      })
-    }
-
-    function start(minutes: string): string {
-      return root.start(Number(minutes), "") ? "ok" : "unavailable"
-    }
-
-    function pause(): string { return root.pause() ? "ok" : "unavailable" }
-    function resume(): string { return root.resume() ? "ok" : "unavailable" }
-    function finish(): string { return root.finishEarly() ? "ok" : "unavailable" }
-    function cancel(): string { return root.cancel() ? "ok" : "unavailable" }
-    function retrySave(): string { root.retrySave(); return "ok" }
-  }
-
   Component.onCompleted: {
     ensureDataDir.running = true
     sleepMonitor.running = true
