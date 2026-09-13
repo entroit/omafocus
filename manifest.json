@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "entroit.omafocus",
+  "name": "Oma Focus",
+  "version": "0.1.0",
+  "author": "Entroit",
+  "license": "MIT",
+  "description": "A local focus timer with per-application recaps and saved history.",
+  "kinds": ["service", "bar-widget"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "src/Service.qml",
+    "barWidget": "src/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Oma Focus",
+    "description": "Focus countdown, application recap, and local history",
+    "category": "Time",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
