@@ -28,6 +28,7 @@ Item {
   property int remainingMilliseconds: 0
 
   property bool writeInFlight: false
+  property int writeAttempt: 0
   property string writingSnapshot: ""
   property string queuedSnapshot: ""
   property double lastCheckpointAt: 0
@@ -74,7 +75,7 @@ Item {
     loaded = true
     lastTickAt = Date.now()
     lastCheckpointAt = lastTickAt
-    if (restored.record || current) queueSave()
+    if (restored.record || current) Qt.callLater(queueSave)
   }
 
   function beginFreshDocument() {
@@ -83,7 +84,7 @@ Item {
     loaded = true
     lastTickAt = Date.now()
     lastCheckpointAt = lastTickAt
-    queueSave()
+    Qt.callLater(queueSave)
   }
 
   function queueSave() {
@@ -97,7 +98,11 @@ Item {
     writingSnapshot = queuedSnapshot
     queuedSnapshot = ""
     writeInFlight = true
-    stateFile.setText(writingSnapshot)
+    // FileView suppresses a second setText() when it matches the payload of a
+    // failed attempt. Alternate harmless trailing whitespace so an explicit
+    // retry always starts a new atomic write.
+    writeAttempt += 1
+    stateFile.setText(writingSnapshot + (writeAttempt % 2 === 0 ? " \n" : "\n"))
   }
 
   function retrySave() {
@@ -291,7 +296,6 @@ Item {
     onExited: function(exitCode) {
       if (exitCode === 0) {
         root.storageReady = true
-        Qt.callLater(stateFile.reload)
       }
       else root.fatalError = "Could not create the data directory: " + root.dataDir
     }
@@ -299,7 +303,8 @@ Item {
 
   FileView {
     id: stateFile
-    path: root.storageReady ? root.dataPath : ""
+    path: root.dataPath
+    preload: root.storageReady
     watchChanges: false
     atomicWrites: true
     printErrors: false
@@ -371,6 +376,8 @@ Item {
         status: root.current ? root.current.status : "inactive",
         remainingMilliseconds: root.remainingMilliseconds,
         sessionCount: root.sessions.length,
+        saving: root.writeInFlight,
+        saveQueued: root.queuedSnapshot !== "",
         error: root.fatalError || root.saveError
       })
     }

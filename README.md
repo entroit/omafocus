@@ -131,11 +131,16 @@ Checked on 2026-09-13:
 - deterministic test suite: passed;
 - 5,000-session serialize/parse/aggregate check: 20.2 ms;
 - logind `PrepareForSleep` signal: present;
-- service load with a disposable data directory: passed;
+- first-run atomic file creation with a disposable data directory: passed;
+- start, checkpoint, finish, and saved recap through the QML service: passed;
+- restart recovery with the gap assigned to `Unattributed`: passed;
+- malformed and newer-schema files stayed unchanged and disabled actions: passed;
+- failed atomic write stayed visible in memory; retry after repair: passed;
+- fresh install and update from the public Git URL: passed;
 - real suspend/resume: not tested;
 - second monitor: not tested;
-- failed-write recovery and interrupted atomic replacement: not tested;
-- fresh remote install and update: pending the first implementation push.
+- interrupted atomic replacement: not tested;
+- deletion while another save is pending: not tested.
 
 Do not treat an untested item as a pass. Release `v0.1.0` only after the manual
 checks in the issue or release PR cover focus changes, the real idle threshold,
