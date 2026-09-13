@@ -110,10 +110,11 @@ The stock shell uses virtual `qs.Ui` and `qs.Commons` import paths. Give
 `qmllint` a temporary matching layout:
 
 ```sh
+omarchy_root=${OMARCHY_PATH:-/usr/share/omarchy}
 lint_imports=$(mktemp -d)
 mkdir -p "$lint_imports/qs"
-ln -s "$OMARCHY_PATH/shell/Ui" "$lint_imports/qs/Ui"
-ln -s "$OMARCHY_PATH/shell/Commons" "$lint_imports/qs/Commons"
+ln -s "$omarchy_root/shell/Ui" "$lint_imports/qs/Ui"
+ln -s "$omarchy_root/shell/Commons" "$lint_imports/qs/Commons"
 /usr/lib/qt6/bin/qmllint -I "$lint_imports" src/Service.qml src/BarWidget.qml src/Panel.qml
 rm -r "$lint_imports"
 ```
@@ -128,6 +129,8 @@ calendar boundaries, daylight-saving time, and 5,000-session responsiveness.
 Checked on 2026-09-13:
 
 - manifest validation: passed;
+- QML lint with the installed host imports: exit 0; the host's dynamic facade
+  types still produce static-analysis warnings;
 - deterministic test suite: passed;
 - 5,000-session serialize/parse/aggregate check: 20.2 ms;
 - logind `PrepareForSleep` signal: present;
